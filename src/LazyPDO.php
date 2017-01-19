@@ -2,8 +2,9 @@
 
 namespace alejoluc\LazyPDO;
 
-class LazyPDO {
+class LazyPDO extends \PDO {
 
+    /** @var \PDO $pdo_conn */
 	private $pdo_conn = null;
 
 	private $connectionString;
@@ -24,38 +25,89 @@ class LazyPDO {
         register_shutdown_function([$this, 'close']);
 	}
 
-	public function __get($key) {
-		return $this->pdo_conn->$key;
-	}
-
-	public function __set($key, $val) {
-		return $this->pdo_conn->$key = $val;
-	}
-
-	public function __call($methodName, $arguments) {
-		if (!$this->isConnected()) {
-			$this->connect();
-		}
-        //return call_user_func_array([$this->pdo_conn, $methodName], $arguments); // For PHP < 5.6.0
-        return $this->pdo_conn->$methodName(...$arguments);
-	}
-
 	public function isConnected() {
 		return $this->pdo_conn !== null;
 	}
 
 	public function connect() {
-		try {
-			$this->pdo_conn = new \PDO($this->connectionString, $this->connectionUser, $this->connectionPasswd, $this->connectionOptions);
-		} catch (\PDOException $e) {
-			var_dump('LazyPDO received PDOException: ', $e->getMessage()); // TODO: Usar el handler
-		}
+	    if (!$this->isConnected()) {
+            $this->pdo_conn = new parent($this->connectionString, $this->connectionUser, $this->connectionPasswd, $this->connectionOptions);
+        }
 	}
 
     public function close() {
         if ($this->isConnected()) {
             $this->pdo_conn = null;
         }
+    }
+
+    public function beginTransaction() {
+        $this->connect();
+        return $this->pdo_conn->beginTransaction();
+    }
+
+    public function commit() {
+        $this->connect();
+        return $this->pdo_conn->commit();
+    }
+
+    public function rollBack() {
+        $this->connect();
+        return $this->pdo_conn->rollBack();
+    }
+
+    public function inTransaction() {
+        $this->connect();
+        return $this->pdo_conn->inTransaction();
+    }
+
+    public function errorCode() {
+        $this->connect();
+        return $this->pdo_conn->errorCode();
+    }
+
+    public function errorInfo() {
+        $this->connect();
+        return $this->pdo_conn->errorInfo();
+    }
+
+    public function exec($statement) {
+        $this->connect();
+        return $this->pdo_conn->exec($statement);
+    }
+
+    public function getAttribute($attribute) {
+        $this->connect();
+        return $this->pdo_conn->getAttribute($attribute);
+    }
+
+    public function setAttribute($attribute, $value) {
+        $this->connect();
+        return $this->pdo_conn->setAttribute($attribute, $value);
+    }
+
+    public static function getAvailableDrivers() {
+        return parent::getAvailableDrivers();
+    }
+
+    public function lastInsertId($name = null) {
+        $this->connect();
+        return $this->pdo_conn->lastInsertId($name);
+    }
+
+    public function prepare($statement, $options = null) {
+        $this->connect();
+        return $this->pdo_conn->prepare($statement, $options);
+    }
+
+    public function query(...$args) {
+        $this->connect();
+        return $this->pdo_conn->query(...$args);
+    }
+
+    public function quote($string, $parameter_type = parent::PARAM_STR) {
+        $this->connect();
+        return $this->pdo_conn->quote($string, $parameter_type);
     }
 
 }
