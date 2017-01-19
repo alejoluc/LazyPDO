@@ -95,9 +95,12 @@ class LazyPDO extends \PDO {
         return $this->pdo_conn->lastInsertId($name);
     }
 
-    public function prepare($statement, $options = null) {
+    public function prepare($statement, $driver_options = null) {
         $this->connect();
-        return $this->pdo_conn->prepare($statement, $options);
+        if (!is_array($driver_options)) {
+            $driver_options = [];
+        }
+        return $this->pdo_conn->prepare($statement, $driver_options);
     }
 
     public function query(...$args) {
