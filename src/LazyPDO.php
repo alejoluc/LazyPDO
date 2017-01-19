@@ -12,8 +12,6 @@ class LazyPDO extends \PDO {
 	private $connectionPasswd;
 	private $connectionOptions;
 
-	private $exceptionHandler;
-
     /**
      * @link http://php.net/manual/en/pdo.construct.php
      * @param $connectionString
@@ -183,7 +181,7 @@ class LazyPDO extends \PDO {
      * @link http://php.net/manual/en/pdo.query.php
      * @return \PDOStatement
      */
-    public function query() {
+    public function query($statement, $mode = parent::ATTR_DEFAULT_FETCH_MODE, $arg3 = null) {
         $args = func_get_args();
         $this->connect();
         return call_user_func_array([$this->pdo_conn, 'query'], $args);
