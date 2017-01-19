@@ -176,8 +176,6 @@ class LazyPDO extends \PDO {
     }
 
     /**
-     * See PHP documentation of this method, since there are several definitions for this method, so there are
-     * multiple ways to call it
      * @link http://php.net/manual/en/pdo.query.php
      * @return \PDOStatement
      */
