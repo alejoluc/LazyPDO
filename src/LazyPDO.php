@@ -176,12 +176,18 @@ class LazyPDO extends \PDO {
     }
 
     /**
-     * See PHP documentation for PDO, since there are several definitions for this method, so there are
+     * See PHP documentation of this method, since there are several definitions for this method, so there are
      * multiple ways to call it
      * @link http://php.net/manual/en/pdo.query.php
      * @return \PDOStatement
      */
     public function query($statement, $mode = parent::ATTR_DEFAULT_FETCH_MODE, $arg3 = null) {
+        // I had to call the underlying function in this way because it seems there are several declarations
+        // of the PDO::query() method, so calling it with one set of parameters would trigger an error, and
+        // calling it in another way, another error, and so on and so on. This fixes it.
+        // It would be easier to use variadic function and argument unpacking, available since PHP5.6, but
+        // phpdocumentor complains (see https://github.com/phpDocumentor/phpDocumentor2/issues/1821)
+        // TODO: change signature and body to a variadic function with argument unpacking when/if phpdoc fixes issue
         $args = func_get_args();
         $this->connect();
         return call_user_func_array([$this->pdo_conn, 'query'], $args);
