@@ -181,12 +181,12 @@ class LazyPDO extends \PDO {
      * See PHP documentation for PDO, since there are several definitions for this method, so there are
      * multiple ways to call it
      * @link http://php.net/manual/en/pdo.query.php
-     * @param array ...$args
      * @return \PDOStatement
      */
-    public function query(...$args) {
+    public function query() {
+        $args = func_get_args();
         $this->connect();
-        return $this->pdo_conn->query(...$args);
+        return call_user_func_array([$this->pdo_conn, 'query'], $args);
     }
 
     /**
