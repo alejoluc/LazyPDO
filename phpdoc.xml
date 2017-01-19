@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<phpdoc>
+    <title>alejoluc\LazyPDO</title>
+    <parser>
+      <target>documentation</target>
+      <encoding>utf-8</encoding>
+      <markers>
+        <item>TODO</item>
+        <item>FIXME</item>
+      </markers>
+    </parser>
+    <transformer>
+      <target>documentation</target>
+    </transformer>
+    <transformations>
+      <template name="clean" />
+    </transformations>
+    <files>
+        <directory>src</directory>
+    </files>
+</phpdoc>
