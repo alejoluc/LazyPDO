@@ -33,7 +33,10 @@ class LazyPDO extends \PDO {
 		$this->connectionOptions = $connectionOptions;
 
         /** @var callable onConnectionErrorCallback */
-        $this->onConnectionErrorCallback = null;
+        $this->onConnectionErrorCallback = function($e){
+            // By default, bubble up the exception
+            throw $e;
+        };
         /** @var callable onConnectCallback */
         $this->onConnectCallback = function(){};
         /** @var callable onCloseCallback */
@@ -84,12 +87,7 @@ class LazyPDO extends \PDO {
                 $callback($this->pdo_conn);
             } catch (\PDOException $e) {
                 $callback = $this->onConnectionErrorCallback;
-                if (is_callable($callback)) {
-                    $callback($e);
-                } else {
-                    // No callback for handling connection errors defined, raise the PDO exception
-                    throw $e;
-                }
+                $callback($e);
             }
         }
 	}
