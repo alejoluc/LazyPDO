@@ -12,8 +12,9 @@ class LazyPDO extends \PDO {
 	private $connectionPasswd;
 	private $connectionOptions;
 
-    private $onConnectCallback = null;
-    private $onCloseCallback   = null;
+    private $onConnectionErrorCallback  = null;
+    private $onConnectCallback          = null;
+    private $onCloseCallback            = null;
 
     /**
      * @link http://php.net/manual/en/pdo.construct.php
@@ -31,6 +32,8 @@ class LazyPDO extends \PDO {
 		$this->connectionPasswd  = $passwd;
 		$this->connectionOptions = $connectionOptions;
 
+        /** @var callable onConnectionErrorCallback */
+        $this->onConnectionErrorCallback = null;
         /** @var callable onConnectCallback */
         $this->onConnectCallback = function(){};
         /** @var callable onCloseCallback */
@@ -38,6 +41,14 @@ class LazyPDO extends \PDO {
 
         register_shutdown_function([$this, 'close']);
 	}
+
+    /**
+     * Sets a function to be called if there is an error when trying to establish a connection with the underlying PDO object
+     * @param callable $callback
+     */
+    public function onConnectionError(callable $callback) {
+        $this->onConnectionErrorCallback = $callback;
+    }
 
     /**
      * Sets a function to be called after the underlying PDO object succesfully establishes a connection
@@ -67,9 +78,19 @@ class LazyPDO extends \PDO {
      */
 	public function connect() {
 	    if (!$this->isConnected()) {
-            $this->pdo_conn = new parent($this->connectionString, $this->connectionUser, $this->connectionPasswd, $this->connectionOptions);
-            $callback = $this->onConnectCallback;
-            $callback($this->pdo_conn);
+            try {
+                $this->pdo_conn = new parent($this->connectionString, $this->connectionUser, $this->connectionPasswd, $this->connectionOptions);
+                $callback = $this->onConnectCallback;
+                $callback($this->pdo_conn);
+            } catch (\PDOException $e) {
+                $callback = $this->onConnectionErrorCallback;
+                if (is_callable($callback)) {
+                    $callback($e);
+                } else {
+                    // No callback for handling connection errors defined, raise the PDO exception
+                    throw $e;
+                }
+            }
         }
 	}
 
