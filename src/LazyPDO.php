@@ -12,6 +12,9 @@ class LazyPDO extends \PDO {
 	private $connectionPasswd;
 	private $connectionOptions;
 
+    private $onConnectCallback = null;
+    private $onCloseCallback   = null;
+
     /**
      * @link http://php.net/manual/en/pdo.construct.php
      * @param $connectionString
@@ -28,8 +31,29 @@ class LazyPDO extends \PDO {
 		$this->connectionPasswd  = $passwd;
 		$this->connectionOptions = $connectionOptions;
 
+        /** @var callable onConnectCallback */
+        $this->onConnectCallback = function(){};
+        /** @var callable onCloseCallback */
+        $this->onCloseCallback   = function(){};
+
         register_shutdown_function([$this, 'close']);
 	}
+
+    /**
+     * Sets a function to be called after the underlying PDO object succesfully establishes a connection
+     * @param callable $callback
+     */
+	public function onConnectionOpen(callable $callback) {
+	    $this->onConnectCallback = $callback;
+    }
+
+    /**
+     * Sets a function to be called after the underlying PDO object is set to null, closing the connection.
+     * @param callable $callback
+     */
+    public function onConnectionClose(callable $callback) {
+        $this->onCloseCallback = $callback;
+    }
 
     /**
      * @return bool
@@ -44,6 +68,8 @@ class LazyPDO extends \PDO {
 	public function connect() {
 	    if (!$this->isConnected()) {
             $this->pdo_conn = new parent($this->connectionString, $this->connectionUser, $this->connectionPasswd, $this->connectionOptions);
+            $callback = $this->onConnectCallback;
+            $callback($this->pdo_conn);
         }
 	}
 
@@ -53,6 +79,8 @@ class LazyPDO extends \PDO {
     public function close() {
         if ($this->isConnected()) {
             $this->pdo_conn = null;
+            $callback = $this->onCloseCallback;
+            $callback();
         }
     }
 
