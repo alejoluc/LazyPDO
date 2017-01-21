@@ -168,3 +168,4 @@ function getUserData($userId, $c) {
 
 getUserData('admin', $c);
 ```
+However, if instead of PDO you are using LazyPDO inside the DIC, in any of the previous two code examples the database connection will not be established unless the cached data cannot be found.
