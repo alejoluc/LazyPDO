@@ -70,7 +70,7 @@ However, many applications have a top-level try/catch, or they have custom error
 
 ## Usage
 
-LazyPDO can be used as you would use PDO. If you know PDO, you know LazyPDO. Simple as that. Just some examples to refresh the mind. Note that you can access the constants from either PDO or LazyPDO, and you can intermingle them, but why do that? Just stick with PDO::* constants to make it clear that they are interoperable.
+LazyPDO can be used as you would use PDO. If you know PDO, you know LazyPDO. Simple as that. Here are some examples to refresh the mind. Note that you can access the constants from either PDO or LazyPDO, and you can intermingle them, but why do that? Just stick with PDO::* constants to make it clear that they are interoperable.
 
 #### With PDO::ERRMODE as ERRMODE_SILENT (default PDO behavior)
 
