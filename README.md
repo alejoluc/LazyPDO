@@ -132,7 +132,7 @@ Again, if you have an application level try/catch, or a custom error handler tha
 
 ## Why not use a Dependency Injection Container instead?
 
-You can, and you can put LazyPDO into it. You can also get the lazy behavior with native PDO inside a DIC, as long as you never pass the PDO key directly and pass the container instead (in which case, it's not a DIC, it's a Service Locator, which [some people](http://www.davidarno.org/2015/10/21/is-the-service-locator-an-anti-pattern/) consider an [anti-pattern](http://blog.ploeh.dk/2010/02/03/ServiceLocatorisanAnti-Pattern/) that should be avoided, but not [all of them](https://candordeveloper.com/2013/04/10/dependency-injection-is-over-hyped/)). If you do pass the PDO key directly, you do not get the same behavior as with LazyPDO, because when you access a member in a DIC, it will most likely instantiate it. Consider [Pimple](https://github.com/silexphp/pimple), which by the way I think is great.
+You can, and you can put LazyPDO into it. But if you want to use native PDO, you could also get the lazy behavior by using a DIC, as long as you never pass the PDO key directly and pass the container instead (in which case, it's not a DIC, it's a Service Locator, which [some people](http://www.davidarno.org/2015/10/21/is-the-service-locator-an-anti-pattern/) consider an [anti-pattern](http://blog.ploeh.dk/2010/02/03/ServiceLocatorisanAnti-Pattern/) that should be avoided, but not [all of them](https://candordeveloper.com/2013/04/10/dependency-injection-is-over-hyped/)). If you do pass the PDO key directly, however, you do not get the same behavior as with LazyPDO, because when you access a member in a DIC, the DIC will most likely instantiate what it contains in said key. Consider [Pimple](https://github.com/silexphp/pimple), which by the way I think is great.
 
 ```php
 <?php
@@ -168,4 +168,23 @@ function getUserData($userId, $c) {
 
 getUserData('admin', $c);
 ```
-However, if instead of PDO you are using LazyPDO inside the DIC, in any of the previous two code examples the database connection will not be established unless the cached data cannot be found.
+However, if instead of PDO you are using LazyPDO inside the DIC, in any of the previous two code examples the database connection will not be established unless the cached data cannot be found. Let's see the first example again, but with LazyPDO instead:
+
+```php
+<?php
+// autoload, instantiate a pimple container into $c, store an hypothetical caching server connection into it, etc.
+use alejoluc\LazyPDO\LazyPDO;
+$c['db'] = function(){
+    return new LazyPDO('....');
+};
+
+function getUserData($userId, $db, $cacheConnection) {
+    if ($cacheConnection->inCache('user:' . $userId)) {
+        return $cacheConnection->getCached('user:' . $userId);
+    } else {
+        $stmt = $db->prepare('SELECT ...'); // The connection will try to be established here, not on the getUserData() function call
+    }
+}
+
+$data = getUserData('admin', $c['db'], $c['cache']); // No connection to the database will try to be established here because $c['db'] will return an instance of LazyPDO
+```
