@@ -228,6 +228,9 @@ class LazyPDO extends \PDO {
      */
     public function query($statement, $mode = parent::ATTR_DEFAULT_FETCH_MODE, $arg3 = null) {
         $this->connect();
+        // I don't use the arguments as passed directly, but instead I get the arguments as an array and unpack it.
+        // This is because there seems to be several implementations of the query() method in native PDO, and calling
+        // it with the arguments as passed to this function almost always returns an error. This fixes it.
         $args = func_get_args();
         return $this->pdo_conn->query(...$args);
     }
