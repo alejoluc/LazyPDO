@@ -1,7 +1,7 @@
 {
   "name"        : "alejoluc/lazypdo",
   "description" : "PDO Drop-in replacement that only makes a connection when needed",
-  "version"     : "0.1.2",
+  "version"     : "0.2.6",
 
   "keywords"  : ["pdo", "database", "lazy"],
   "homepage"  : "https://github.com/alejoluc/LazyPDO",
